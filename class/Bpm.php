@@ -1,5 +1,5 @@
 <?php
-require "../../db_config/config.php";
+//require "../../db_config/config.php";
 class Bpm{
     
     private $bpmTable = "a21iot07.bpm";
@@ -13,17 +13,10 @@ class Bpm{
     }
 
     public function read() {
-        $stmt = $this->conn->prepare("SELECT * FROM ".$this->bpmTable.";");
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result;
-    }
-    public function readPDO() {
         $query = "SELECT * FROM a21iot07.bpm";
-        $statement = $this->conn->query($query);
-        $result = $statement->fetchAll(PDO::FETCH_ASSOC);
-        $result = json_encode($result);
-        return $result;
+        $stmt = $this->conn->query($query);
+        $stmt->execute();
+        return $stmt;
     }
 
     public function readAfter($timeESP) {
@@ -59,23 +52,25 @@ class Bpm{
     
 
     public function create() {
-        $query = "INSERT INTO ". $this->bpmTable." (`bpm`, `timeESP`, `timePHP`)  VALUES (?, ?, ?)";
+
+        //prepare query
+        $query = "INSERT INTO ". $this->bpmTable." (`bpm`, `timeESP`, `timePHP`)  VALUES (:bpm, :timeESP, :timePHP)";
         $stmt = $this->conn->prepare($query);
         //insert values into ??? fields
-        if($stmt) {
-            $stmt->bind_param("iss", $this->bpm, $this->timeESP, $this->timePHP);
-            //execute
-            if($stmt->execute()) {
-                return true;
-            }
-            $error = $this->conn->errno . ' ' . $this->conn->error;
-            echo $error;
-            return false;   
-        } else {
-            $error = $this->conn->errno . ' ' . $this->conn->error;
-            echo $error;
-            return false;
+        $stmt->bindParam(":bpm", $this->bpm);
+        $stmt->bindParam(":timeESP", $this->timeESP);
+        $stmt->bindParam(":timePHP", $this->timePHP);
+        
+        //execute
+        if($stmt->execute()) {
+            return true;
         }
+
+        //if there is an error
+        $error = $this->conn->errno . ' ' . $this->conn->error;
+        echo $error;
+        return false;   
+       
             
     }
 

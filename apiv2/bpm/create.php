@@ -6,12 +6,12 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-include_once '../../db_config/Database.php';
+include_once '../../db_config/config.php';
 include_once '../../class/Bpm.php';
 
 
 //connect to DB
-$database = new Database();
+$database = new PDOdb();
 $db = $database->getConnection();
 
 //instantiate new BPM object

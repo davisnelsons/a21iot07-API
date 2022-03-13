@@ -13,7 +13,7 @@ class PDOdb {
         $pdo = new PDO($dsn, $this->user, $this->password);
 
         if ($pdo) {
-            echo "Connected to the ".$this->db." database successfully!";
+            ;;
         }
         return $pdo;
     }

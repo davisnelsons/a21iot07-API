@@ -9,33 +9,28 @@ include_once '../../db_config/config.php';
 $database = new PDOdb();
 $db = $database->getConnection();
 
-$bpm = new Bpm($db);
+$bpm_inst = new Bpm($db);
 
-//$timeESPAfter = $_GET['timeESPAfter'];
-/*
-if ($timeESPAfter != null) {
-    echo "readAfter!";
-    $result = $bpm->readAfter($timeESPAfter);
-} else {
-    
-}*/
-$result = $bpm->readPDO();
+$statement = $bpm_inst->read();
+$itemCount = $statement->rowCount();
 
-echo $result;
-if($result->num_rows > 0){    
-    $itemRecords=array();
-    $itemRecords["bpms"]=array(); 
-	while ($item = $result->fetch_assoc()) { 	
-        extract($item); 
-        $itemDetails=array(
+if($itemCount > 0){    
+
+    $bpmArray = array();
+    $bpmArray["body"] = array();
+    $bpmArray["itemCount"] = $itemCount;
+    while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
+        extract($row);
+        $b = array(
             "bpm" => $bpm,
-            "timeESP" => $timeESP,
-            "timePHP" => $timePHP		
-        ); 
-       array_push($itemRecords["bpms"], $itemDetails);
-    }    
+            "timeESP"=>$timeESP,
+            "timePHP"=>$timePHP
+        );
+        array_push($bpmArray["body"], $b);
+    }
+    
     http_response_code(200);     
-    echo json_encode($itemRecords);
+    echo json_encode($bpmArray);
 }else{     
     http_response_code(404);     
     echo json_encode(
