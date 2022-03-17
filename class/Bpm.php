@@ -13,40 +13,36 @@ class Bpm{
     }
 
     public function read() {
-        $query = "SELECT * FROM a21iot07.bpm";
-        $stmt = $this->conn->query($query);
+        $query = "SELECT * FROM a21iot07.bpm
+        WHERE timeESP >= :timeToday" ;
+        $timeToday = date("Y-m-d ") . "00:00:00";
+        //$stmt = $this->conn->query($query);
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":timeToday", $timeToday);
         $stmt->execute();
         return $stmt;
     }
 
     public function readAfter($timeESP) {
         $timeESP = htmlspecialchars(strip_tags($timeESP));
-        $timeESP = str_replace(": ", ":", $timeESP);
         $query = "SELECT * FROM ". $this->bpmTable .
-        " WHERE timeESP>? ";
+        " WHERE timeESP>:timeESP ";
         $stmt = $this->conn->prepare($query);
-        //echo $query;
-        if($stmt) {
-            $stmt->bind_param("s", $timeESP);
-            $result = $stmt->execute();
-            if($result != false) {
-                return $result;
-            } else {
-                echo "result false";
-                return false;
-            }
-        } else {
-            
-            $error = $this->conn->errno . ' ' . $this->conn->error;
-            echo $error;
-            return false;
-        }
-
-
+        $stmt->bindParam(":timeESP", $timeESP);
+        $stmt->execute();
+        return $stmt;
+    }
         
-        
-        $result = $stmt->get_result();
-        return $result;
+    public function readBetween($timeBefore, $timeAfter) {
+        $timeBefore = htmlspecialchars(strip_tags($timeBefore));
+        $timeAfter = htmlspecialchars(strip_tags($timeAfter));
+        $query = "SELECT * FROM ". $this->bpmTable .
+        " WHERE timeESP>:timeBefore AND timeESP < :timeAfter";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":timeBefore", $timeBefore);
+        $stmt->bindParam(":timeAfter", $timeAfter);
+        $stmt->execute();
+        return $stmt;
     }
 
     
@@ -73,5 +69,6 @@ class Bpm{
        
             
     }
+    
 
 }
