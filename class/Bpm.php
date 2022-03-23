@@ -45,6 +45,28 @@ class Bpm{
         return $stmt;
     }
 
+    public function readBetweenAvg($timeBefore, $timeAfter) {
+        $timeBefore = htmlspecialchars(strip_tags($timeBefore));
+        $timeAfter = htmlspecialchars(strip_tags($timeAfter));
+        $query = "SELECT ROUND(AVG(bpm),0) AS avg_bpm FROM ". $this->bpmTable .
+        " WHERE timeESP>:timeBefore AND timeESP < :timeAfter";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":timeBefore", $timeBefore);
+        $stmt->bindParam(":timeAfter", $timeAfter);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    public function readLast() {
+        $query = "SELECT * FROM a21iot07.bpm
+        ORDER BY timeESP desc LIMIT 1";
+        $timeToday = date("Y-m-d ") . "00:00:00";
+        //$stmt = $this->conn->query($query);
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":timeToday", $timeToday);
+        $stmt->execute();
+        return $stmt;
+    }
     
 
     public function create() {

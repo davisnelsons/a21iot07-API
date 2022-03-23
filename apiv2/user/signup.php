@@ -26,11 +26,15 @@ if(filter_var($data->email, FILTER_VALIDATE_EMAIL)) {
     failure();
 }
 $password = htmlspecialchars($data->password);
+$birthDate = htmlspecialchars($data->birthDate);
+$weight = htmlspecialchars($data->weight);
+$height = htmlspecialchars($data->height);
+
 
 //init user
 $user = new User($db);
 
-if($user->signup($firstName, $lastName, $email, $password)) {
+if($user->signup($firstName, $lastName, $email, $password, $birthDate, $weight, $height)) {
     //all fine
     http_response_code(201);
     echo json_encode(array("message"=>"done"));

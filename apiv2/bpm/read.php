@@ -36,9 +36,17 @@ if(isset($_GET["last_ESPtime"])) {
     $param_fromESPtime = urldecode($_GET["from_ESPtime"]);
     $param_toESPtime = urldecode($_GET["to_ESPtime"]);
     if(validate_date($param_fromESPtime) & validate_date($param_toESPtime)) {   //check validity of dates
-        //return all measurements made in this specific period
-        $statement=$bpm_inst->readBetween($param_fromESPtime, $param_toESPtime);
+        if(isset($_GET["average"])) {
+            $statement = $bpm_inst->readBetweenAvg($param_fromESPtime, $param_toESPtime);
+            returnAverage($statement);
+        } else {
+            //return all measurements made in this specific period
+            $statement=$bpm_inst->readBetween($param_fromESPtime, $param_toESPtime);
+        }
     }
+} else if (isset($_GET["get_last"])) {
+    //return last measurement
+    $statement = $bpm_inst->readLast();
 } else {
     //return todays measurements
     $statement = $bpm_inst->read();
@@ -54,7 +62,7 @@ if($itemCount > 0){
     while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
         extract($row);
         $b = array(
-            "bpm" => $bpm,
+            "bpm" => intval($bpm),
             "timeESP"=>$timeESP,
             "timePHP"=>$timePHP
         );
@@ -70,6 +78,18 @@ if($itemCount > 0){
 } 
 
 
+function returnAverage($statement) {
+    $row = $statement->fetch(PDO::FETCH_ASSOC);
+    extract($row);
+    if($avg_bpm != null) {
+        http_response_code(200);
+        echo json_encode(array("avg_bpm" => intval($avg_bpm)));
+    } else {
+        http_response_code(200);
+        echo json_encode(array("avg_bpm" => 0));
+    }
+    exit();
+}
 
 
 function token_invalid() {

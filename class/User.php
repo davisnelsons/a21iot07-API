@@ -9,19 +9,23 @@ class User{
         $this->conn = $db;
     }
 
-    public function signup($newFirstName, $newLastName, $newEmail, $newPassword) {
-        $query = "INSERT INTO ".$this->userTable." (`name`, `lastName`, `email`, `password`) VALUES (:firstName, :lastName, :email, :password)";
+    public function signup($newFirstName, $newLastName, $newEmail, $newPassword, $newBirthDate, $newWeight, $newHeight) {
+        $query = "INSERT INTO ".$this->userTable." (`name`, `lastName`, `email`, `password`, `birthDate`, `weight`, `height`)
+         VALUES (:firstName, :lastName, :email, :password, :birthDate, :weight, :height)";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":firstName", $newFirstName);
         $stmt->bindParam(":lastName", $newLastName);
         $stmt->bindParam(":email", $newEmail);
         $stmt->bindParam(":password", $newPassword);
+        $stmt->bindParam(":birthDate", $newBirthDate);
+        $stmt->bindParam(":weight", $newWeight);
+        $stmt->bindParam(":height", $newHeight);
         //execute
         if($stmt->execute()) {
             return true;
         }
         //if there is an error
-        $error = $this->conn->errno . ' ' . $this->conn->error;
+        $error = $this->conn->getMessage();
         echo $error;
         return false;   
     }
