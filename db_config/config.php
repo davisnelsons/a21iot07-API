@@ -11,10 +11,7 @@ class PDOdb {
     public function getConnection() {
         $dsn = "mysql:host=" . $this->host .";dbname=".$this->db.";charset=UTF8";
         $pdo = new PDO($dsn, $this->user, $this->password);
-
-        if ($pdo) {
-            echo "Connected to the ".$this->db." database successfully!";
-        }
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $pdo;
     }
 }

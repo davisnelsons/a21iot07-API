@@ -1,5 +1,5 @@
 <?php
-require "../../db_config/config.php";
+//require "../../db_config/config.php";
 class Bpm{
     
     private $bpmTable = "a21iot07.bpm";
@@ -13,70 +13,84 @@ class Bpm{
     }
 
     public function read() {
-        $stmt = $this->conn->prepare("SELECT * FROM ".$this->bpmTable.";");
+        $query = "SELECT * FROM a21iot07.bpm
+        WHERE timeESP >= :timeToday" ;
+        $timeToday = date("Y-m-d ") . "00:00:00";
+        //$stmt = $this->conn->query($query);
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":timeToday", $timeToday);
         $stmt->execute();
-        $result = $stmt->get_result();
-        return $result;
-    }
-    public function readPDO() {
-        $query = "SELECT * FROM a21iot07.bpm";
-        $statement = $this->conn->query($query);
-        $result = $statement->fetchAll(PDO::FETCH_ASSOC);
-        $result = json_encode($result);
-        return $result;
+        return $stmt;
     }
 
     public function readAfter($timeESP) {
         $timeESP = htmlspecialchars(strip_tags($timeESP));
-        $timeESP = str_replace(": ", ":", $timeESP);
         $query = "SELECT * FROM ". $this->bpmTable .
-        " WHERE timeESP>? ";
+        " WHERE timeESP>:timeESP ";
         $stmt = $this->conn->prepare($query);
-        //echo $query;
-        if($stmt) {
-            $stmt->bind_param("s", $timeESP);
-            $result = $stmt->execute();
-            if($result != false) {
-                return $result;
-            } else {
-                echo "result false";
-                return false;
-            }
-        } else {
-            
-            $error = $this->conn->errno . ' ' . $this->conn->error;
-            echo $error;
-            return false;
-        }
-
-
+        $stmt->bindParam(":timeESP", $timeESP);
+        $stmt->execute();
+        return $stmt;
+    }
         
-        
-        $result = $stmt->get_result();
-        return $result;
+    public function readBetween($timeBefore, $timeAfter) {
+        $timeBefore = htmlspecialchars(strip_tags($timeBefore));
+        $timeAfter = htmlspecialchars(strip_tags($timeAfter));
+        $query = "SELECT * FROM ". $this->bpmTable .
+        " WHERE timeESP>:timeBefore AND timeESP < :timeAfter";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":timeBefore", $timeBefore);
+        $stmt->bindParam(":timeAfter", $timeAfter);
+        $stmt->execute();
+        return $stmt;
     }
 
+    public function readBetweenAvg($timeBefore, $timeAfter) {
+        $timeBefore = htmlspecialchars(strip_tags($timeBefore));
+        $timeAfter = htmlspecialchars(strip_tags($timeAfter));
+        $query = "SELECT ROUND(AVG(bpm),0) AS avg_bpm FROM ". $this->bpmTable .
+        " WHERE timeESP>:timeBefore AND timeESP < :timeAfter";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":timeBefore", $timeBefore);
+        $stmt->bindParam(":timeAfter", $timeAfter);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    public function readLast() {
+        $query = "SELECT * FROM a21iot07.bpm
+        ORDER BY timeESP desc LIMIT 1";
+        $timeToday = date("Y-m-d ") . "00:00:00";
+        //$stmt = $this->conn->query($query);
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":timeToday", $timeToday);
+        $stmt->execute();
+        return $stmt;
+    }
     
 
     public function create() {
-        $query = "INSERT INTO ". $this->bpmTable." (`bpm`, `timeESP`, `timePHP`)  VALUES (?, ?, ?)";
+
+        //prepare query
+        $query = "INSERT INTO ". $this->bpmTable." (`bpm`, `timeESP`, `timePHP`)  VALUES (:bpm, :timeESP, :timePHP)";
         $stmt = $this->conn->prepare($query);
         //insert values into ??? fields
-        if($stmt) {
-            $stmt->bind_param("iss", $this->bpm, $this->timeESP, $this->timePHP);
-            //execute
-            if($stmt->execute()) {
-                return true;
-            }
-            $error = $this->conn->errno . ' ' . $this->conn->error;
-            echo $error;
-            return false;   
-        } else {
-            $error = $this->conn->errno . ' ' . $this->conn->error;
-            echo $error;
-            return false;
+        $stmt->bindParam(":bpm", $this->bpm);
+        $stmt->bindParam(":timeESP", $this->timeESP);
+        $stmt->bindParam(":timePHP", $this->timePHP);
+        
+        //execute
+        if($stmt->execute()) {
+            return true;
         }
+
+        //if there is an error
+        $error = $this->conn->errno . ' ' . $this->conn->error;
+        echo $error;
+        return false;   
+       
             
     }
+    
 
 }

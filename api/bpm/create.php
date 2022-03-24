@@ -6,12 +6,12 @@ header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-include_once '../../db_config/Database.php';
+include_once '../../db_config/config.php';
 include_once '../../class/Bpm.php';
 
 
 //connect to DB
-$database = new Database();
+$database = new PDOdb();
 $db = $database->getConnection();
 
 //instantiate new BPM object
@@ -30,14 +30,17 @@ if(!empty($data->bpm) && !empty($data->timeESP)) {
     $bpm->timePHP=date("Y-m-d H:i:s");
 
     if($bpm->create()) {
+        //all ok
         http_response_code(201);
         echo json_encode(array("message" => "done"));
     } else {
+        //something wrong with server
         http_response_code(503);
         echo json_encode(array("error" => "unable to send data to server"));
     }
  
 } else {
+    //data submitted in wrong format/missing data
     http_response_code(400);
     echo json_encode(array("error" => "data failed integrity check, missing information!"));
 }
