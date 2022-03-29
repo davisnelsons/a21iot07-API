@@ -10,10 +10,10 @@ include_once '../../db_config/config.php';
 include_once '../../db_config/jwt_util.php';
 include_once '../../class/User.php';
 
-parse_str(file_get_contents("php://input"), $data);             
-$data = (object)$data; 
-$email = $data->{"email"};
-$password = $data->{"password"};
+          
+$data = json_decode(file_get_contents("php://input"));
+$email = $data->email;
+$password = $data->password;
 //connect to DB
 $database = new PDOdb();
 $db = $database->getConnection();

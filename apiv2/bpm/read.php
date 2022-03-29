@@ -1,7 +1,11 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
+#header("Access-Control-Allow-Origin: *");
+#header("Content-Type: application/json; charset=UTF-8");
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+error_reporting(E_WARNING); 
 include_once '../../class/Bpm.php';
 include_once '../../db_config/config.php';
 include_once '../../db_config/jwt_util.php';
@@ -12,7 +16,7 @@ $db = $database->getConnection();
 
 $bpm_inst = new Bpm($db);
 
-
+error_log("hello");
 //authorize token
 $token = get_bearer_token();
 $is_jwt_valid = is_jwt_valid($token);
@@ -49,12 +53,14 @@ if(isset($_GET["last_ESPtime"])) {
     $statement = $bpm_inst->readLast();
 } else {
     //return todays measurements
+    error_log("todays meas");
     $statement = $bpm_inst->read();
 }
 
 
 //return requested data
 $itemCount = $statement->rowCount();
+error_log("item count is " . $itemCount);
 if($itemCount > 0){    
     $bpmArray = array();
     $bpmArray["body"] = array();
@@ -70,11 +76,14 @@ if($itemCount > 0){
     }
     http_response_code(200);     
     echo json_encode($bpmArray);
-}else{     
-    http_response_code(204);     
+    exit();
+}else{   
+    http_response_code(200);     
     echo json_encode(
         array("message" => "No item found.")
     );
+    exit();
+
 } 
 
 

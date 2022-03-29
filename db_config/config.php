@@ -3,10 +3,11 @@
 
 class PDOdb {
 
-    private $host = 'mysql.studev.groept.be';
+    
+    private $host = '35.205.31.15';
     private $db = 'a21iot07';
-    private $user = 'a21iot07';
-    private $password = 'TTNkKn1a';
+    private $user = 'root';
+    private $password = 'secret';
 
     public function getConnection() {
         $dsn = "mysql:host=" . $this->host .";dbname=".$this->db.";charset=UTF8";
