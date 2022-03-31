@@ -10,6 +10,7 @@ include_once '../../db_config/config.php';
 include_once '../../db_config/jwt_util.php';
 include_once '../../class/User.php';
 
+$expires_in = 3600; //expiry time in seconds
           
 $data = json_decode(file_get_contents("php://input"));
 $email = $data->email;
@@ -23,14 +24,15 @@ $password = htmlspecialchars($data->password);
 
 $user = new User($db);
 
-$token = $user->login($email, $password);
+$token = $user->login($email, $password, $expires_in);
 
 if($token == "") {
     //failed login
     http_response_code(401);
     echo json_encode(array("error" => "auth failed"));
 } else {
-    //logged in, return
+    //logged in
     http_response_code(200);
-    echo json_encode(array("token"=>$token));
+    echo json_encode(array("token"=>$token,
+                            "expires_on"=>time()+$expires_in));
 }

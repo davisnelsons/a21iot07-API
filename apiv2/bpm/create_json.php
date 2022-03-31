@@ -17,39 +17,15 @@ $db = $database->getConnection();
 
 //instantiate new BPM object
 $bpm_inst = new Bpm($db);
-/*
+
 //get data from the POST request
 $data = json_decode(file_get_contents("php://input"));
 
 //check if empty
 if(empty($data)) {
     invalidData();
-}*/
+}
 
-//for now get data from the link
-$bpm = $_REQUEST["bpm"];
-$timeESP = $_REQUEST["timeESP"];
-
-
-if(isset($bpm) & isset($timeESP)) {
-    $bpm_inst->bpm = $bpm;
-    $bpm_inst->timeESP = $timeESP;
-    $bpm_inst->timePHP = date("Y-m-d H:i:s");
-    if(!$bpm_inst->create()) {
-        http_response_code(201);
-        echo json_encode(array("message" => "insert successful"));
-    } else {
-        http_response_code(201);
-        echo json_encode(array("message" => "insert successful"));
-    }
-} 
-exit();
-
-
-
-
-//non-relevant code!!!4
-/*
 //all data present
 //$elementCount = count($data);
 $date = date("Y-m-d H:i:s");
@@ -69,7 +45,6 @@ for($i = 0; $i < count($data->bpms); $i++) {
     }
 }
 $fails = count($ret); //how many failed db pushes
-
 
 if($fails > 0) {
 
@@ -98,4 +73,3 @@ function invalidData() {
     echo json_encode(array("error" => "data failed integrity check, missing information!"));
     exit();
 }
-*/ 

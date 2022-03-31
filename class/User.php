@@ -30,7 +30,7 @@ class User{
         return false;   
     }
 
-    public function login($email, $password) {
+    public function login($email, $password, $expires_in) {
         $query = "SELECT userId FROM ".$this->userTable." WHERE email LIKE :email AND password like :password";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":email", $email);
@@ -41,7 +41,7 @@ class User{
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             extract($row);                                                    //makes a variable %$userId containing userId
             $headers = array("alg"=>"HS256", "typ"=>"JWT");
-            $payload = array("userId"=>$userId, "exp"=>(time()+3600));        //token expires in one hour, token also contains userId
+            $payload = array("userId"=>$userId, "exp"=>(time()+$expires_in));        //token expires in 1 hour, token also contains userId
             $jwt = generate_jwt($headers, $payload);
             return $jwt;
         } else {
