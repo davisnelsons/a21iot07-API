@@ -1,11 +1,8 @@
 <?php
-#header("Access-Control-Allow-Origin: *");
-#header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-error_reporting(E_WARNING); 
+
 include_once '../../class/Bpm.php';
 include_once '../../db_config/config.php';
 include_once '../../db_config/jwt_util.php';
@@ -16,7 +13,7 @@ $db = $database->getConnection();
 
 $bpm_inst = new Bpm($db);
 
-error_log("hello");
+
 //authorize token
 $token = get_bearer_token();
 $is_jwt_valid = is_jwt_valid($token);
@@ -53,7 +50,6 @@ if(isset($_GET["last_ESPtime"])) {
     $statement = $bpm_inst->readLast();
 } else {
     //return todays measurements
-    error_log("todays meas");
     $statement = $bpm_inst->read();
 }
 
@@ -101,11 +97,7 @@ function returnAverage($statement) {
 }
 
 
-function token_invalid() {
-    http_response_code(401);
-    echo json_encode(array("error"=>"invalid token"));
-    exit();
-}
+
 
 function date_invalid() {
     http_response_code(400);

@@ -50,4 +50,40 @@ class User{
         }
     }
 
+    public function linkDevice($device_id, $user_id) {
+        $query = "INSERT INTO a21iot07.Device (device_id, user_id) VALUES (:device_id, :user_id);";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":device_id", $device_id);
+        $stmt->bindParam(":user_id", $user_id);
+        if($stmt->execute()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function getSettings($user_id) {
+        $query = "SELECT setting, value FROM a21iot07.user_settings WHERE user_id = :user_id;";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":user_id", $user_id);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    public function postSettings($setting, $value, $user_id) {
+        $query = "INSERT INTO a21iot07.user_settings(setting, value, user_id) 
+        VALUES(:setting, :value, :user_id)
+        ON DUPLICATE KEY UPDATE
+        value = :value;";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":user_id", $user_id);
+        $stmt->bindParam(":setting", $setting);
+        $stmt->bindParam(":value", $value);
+        if($stmt->execute()) {
+            return true;
+        }
+        return false;
+    }
+
+    
 }

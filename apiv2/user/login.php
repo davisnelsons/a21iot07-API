@@ -34,5 +34,5 @@ if($token == "") {
     //logged in
     http_response_code(200);
     echo json_encode(array("token"=>$token,
-                            "expires_on"=>time()+$expires_in));
+                           "expires_on"=>time()+$expires_in));
 }

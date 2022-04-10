@@ -42,6 +42,10 @@ function get_authorization_header(){
 }
 
 function is_jwt_valid($jwt) {
+	if(is_null($jwt)) {
+		return FALSE;
+	}
+
 	$secret = 'iot0770tioIOT0770TIOIIIOOOTtT000777OOOTTTIII777';
 	// split the jwt
 	$tokenParts = explode('.', $jwt);
@@ -82,6 +86,17 @@ function get_bearer_token() {
         }
     }
     return null;
+}
+
+function get_user_id($token) {
+    $tokenParts = explode('.', $token);
+    $payload = json_decode(base64_decode($tokenParts[1]));
+    return $payload->userId;
+}
+function token_invalid() {
+    http_response_code(401);
+    echo json_encode(array("error"=>"invalid token"));
+    exit();
 }
 
 function base64url_encode($data) {
