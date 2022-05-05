@@ -4,6 +4,7 @@ header("Content-Type: application/json; charset=UTF-8");
 
 
 include_once '../../class/User.php';
+include_once '../../class/Steps.php';
 include_once '../../db_config/config.php';
 include_once '../../db_config/jwt_util.php';
 include_once '../../db_config/util.php';
@@ -12,6 +13,7 @@ $database = new PDOdb();
 $db = $database->getConnection();
 //init user
 $user_inst = new User($db);
+$steps_inst = new Steps($db);
 
 //authorize token
 $token = get_bearer_token();
@@ -24,26 +26,24 @@ if (!$is_jwt_valid) {
 
 //get user id from the token
 $userID = get_user_id($token);
+$stmt = $user_inst->getUser($userID);
+$stmt_steps = $steps_inst->getBestWeek();
 
-//get statement
-$stmt = $user_inst->getSettings($userID);
-
-//initialize array that will be returned
-$settings_array = array(
-    "daily_steps"=>null,
-    "daily_calories"=>null,
-    "max_hr"=>null,
-    "notify_hr"=>null,
-    "notify_sitting"=>null
-);
-
-
-while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+$itemCount = $stmt->rowCount();
+if($itemCount == 1) {
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
     extract($row);
-    //change only array elems that have a set val
-    $settings_array[$setting] = intval($value);
+    $user_data = array(
+        "name" => $name,
+        "lastName" => $lastName,
+        "birthDate" => $birthDate,
+        "weight" => $weight,
+        "height" => $height,
+        "email" => $email
+    );
+    http_response_code(200);
+    echo json_encode($user_data);
+} else {
+    http_response_code(401);
+    echo json_encode(array("error"=>"failed"));
 }
-
-http_response_code(200);
-echo json_encode($settings_array);
-

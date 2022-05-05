@@ -1,2 +1,2 @@
 <?php
-echo json_encode($_REQUEST);    
+echo file_get_contents("php://input");    

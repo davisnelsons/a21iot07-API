@@ -14,11 +14,13 @@ class Bpm{
 
     public function read() {
         $query = "SELECT * FROM a21iot07.bpm
-        WHERE timeESP >= :timeToday" ;
+        WHERE timeESP >= :timeToday AND timeESP <= :timeTodayMidnight" ;
         $timeToday = date("Y-m-d ") . "00:00:00";
+        $timeTodayMidnight = date("Y-m-d ") . "23:59:59";
         //$stmt = $this->conn->query($query);
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":timeToday", $timeToday);
+        $stmt->bindParam(":timeTodayMidnight", $timeTodayMidnight);
         $stmt->execute();
         return $stmt;
     }
@@ -68,6 +70,14 @@ class Bpm{
         return $stmt;
     }
     
+    public function readWeekAvg() {
+        $query = "SELECT ROUND(AVG(bpm)) AS avg_bpm, DATE(timeESP) AS dateESP FROM a21iot07.bpm 
+        GROUP BY dateESP
+        HAVING dateESP > DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) AND dateESP <= CURRENT_DATE();";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
 
     public function create() {
 

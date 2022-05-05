@@ -12,6 +12,7 @@ class User{
     public function signup($newFirstName, $newLastName, $newEmail, $newPassword, $newBirthDate, $newWeight, $newHeight) {
         $query = "INSERT INTO ".$this->userTable." (`name`, `lastName`, `email`, `password`, `birthDate`, `weight`, `height`)
          VALUES (:firstName, :lastName, :email, :password, :birthDate, :weight, :height)";
+        $query2 = "SELECT userId FROM ".$this->userTable." WHERE email like :email;";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":firstName", $newFirstName);
         $stmt->bindParam(":lastName", $newLastName);
@@ -22,6 +23,12 @@ class User{
         $stmt->bindParam(":height", $newHeight);
         //execute
         if($stmt->execute()) {
+            $stmt2 = $this->conn->prepare($query2);
+            $stmt2->bindParam(":email", $newEmail);
+            $stmt2->execute();
+            $row = $stmt2->fetch(PDO::FETCH_ASSOC);
+            extract($row);
+            $this->postDefaultSettings($userId);
             return true;
         }
         //if there is an error
@@ -48,6 +55,14 @@ class User{
             //failed to authorize
             return "";
         }
+    }
+
+    public function getUser($user_id) {
+        $query = "SELECT name, lastName, birthDate, weight, height, email FROM a21iot07.user WHERE userId = :user_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam("user_id", $user_id);
+        $stmt->execute();
+        return $stmt;
     }
 
     public function linkDevice($device_id, $user_id) {
@@ -85,5 +100,16 @@ class User{
         return false;
     }
 
+
+    public function postDefaultSettings($user_id) {
+        if( $this->postSettings("daily_steps", 10000, $user_id) &
+            $this->postSettings("daily_calories", 400, $user_id) &
+            $this->postSettings("max_hr", 190, $user_id) )
+        {
+            return true;
+        }
+        return false;
+    
+    }
     
 }
