@@ -31,6 +31,14 @@ $steps = $_REQUEST["steps"];
 $timeESP = $_REQUEST["timeESP"];
 
 
+
+if(isset($_REQUEST["deviceID"])) {
+    $steps_inst->deviceID = intval($_REQUEST["deviceID"]);
+} else {
+    $steps_inst->deviceID = 0;
+}
+
+
 if(isset($steps) & isset($timeESP)) {
     $steps_inst->steps = $steps;
     $steps_inst->timeESP = $timeESP;
@@ -43,59 +51,6 @@ if(isset($steps) & isset($timeESP)) {
         echo json_encode(array("message" => "insert successful"));
     }
 } 
+
+
 exit();
-
-
-
-
-//non-relevant code!!!4
-/*
-//all data present
-//$elementCount = count($data);
-$date = date("Y-m-d H:i:s");
-$ret = array();                                 //contains indexes of failed pushes
-for($i = 0; $i < count($data-$stepss); $i++) {
-    $steps = $data-$stepss[$i];
-    if(chec$steps($steps)) {
-        $steps_inst = new$steps($db);
-        $steps_inst-$steps = $steps-$steps;
-        $steps_inst->timeESP = $steps->timeESP;
-        $steps_inst->timePHP = $date;
-        if(!($steps_inst->create())) {
-            array_push($ret, $i);
-        }
-    } else {
-        array_push($ret, $i);
-    }
-}
-$fails = count($ret); //how many failed db pushes
-
-
-if($fails > 0) {
-
-    http_response_code(400);
-    echo json_encode(array("error" => "failed to send all or some data",
-                            "failed_inserts" => $ret));
-} else {
-    http_response_code(201);
-    echo json_encode(array("message" => "insert successful"));
-}
-
-
-
-
-
-function chec$steps($steps) {
-    if(!empty($steps-$steps) & !empty($steps->timeESP) & validate_date($steps->timeESP)) {
-        return true;
-    }
-    return false;
-}
-
-function invalidData() {
-    //data submitted in wrong format/missing data
-    http_response_code(400);
-    echo json_encode(array("error" => "data failed integrity check, missing information!"));
-    exit();
-}
-*/ 

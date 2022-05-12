@@ -61,8 +61,9 @@ class Bpm{
 
     public function readLast() {
         $query = "SELECT * FROM a21iot07.bpm
+        WHERE timeESP < :timeToday
         ORDER BY timeESP desc LIMIT 1";
-        $timeToday = date("Y-m-d ") . "00:00:00";
+        $timeToday = date("Y-m-d H:i:s");
         //$stmt = $this->conn->query($query);
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":timeToday", $timeToday);

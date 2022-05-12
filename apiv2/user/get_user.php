@@ -27,7 +27,7 @@ if (!$is_jwt_valid) {
 //get user id from the token
 $userID = get_user_id($token);
 $stmt = $user_inst->getUser($userID);
-$stmt_steps = $steps_inst->getBestWeek();
+$best_steps = $steps_inst->getBestWeek();
 
 $itemCount = $stmt->rowCount();
 if($itemCount == 1) {
@@ -39,7 +39,8 @@ if($itemCount == 1) {
         "birthDate" => $birthDate,
         "weight" => $weight,
         "height" => $height,
-        "email" => $email
+        "email" => $email,
+        "best_step_week" => $best_steps
     );
     http_response_code(200);
     echo json_encode($user_data);

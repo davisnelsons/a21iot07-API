@@ -65,6 +65,14 @@ class User{
         return $stmt;
     }
 
+    public function getUserIDfromDeviceID($device_id) {
+        $query = "SELECT user_id FROM a21iot07.device WHERE device_id = :device_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":device_id", $device_id);
+        $stmt->execute();
+        return $stmt;
+    }
+
     public function linkDevice($device_id, $user_id) {
         $query = "INSERT INTO a21iot07.Device (device_id, user_id) VALUES (:device_id, :user_id);";
         $stmt = $this->conn->prepare($query);
