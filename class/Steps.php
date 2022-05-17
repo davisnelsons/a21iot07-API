@@ -5,7 +5,7 @@ class Steps{
     public $steps;
     public $timeESP;
     public $timePHP;
-    public $deviceID;
+    public $device_id;
     private $conn;
 
     public function __construct($db) {
@@ -84,12 +84,12 @@ class Steps{
 
     public function create() {
         //prepare query
-        $query = "INSERT INTO ". $this->stepsTable." (`steps`, `timeESP`, `deviceID`)  VALUES (:steps, :timeESP, :deviceID)";
+        $query = "INSERT INTO ". $this->stepsTable." (`steps`, `timeESP`, `deviceID`)  VALUES (:steps, :timeESP, :device_id)";
         $stmt = $this->conn->prepare($query);
         //insert values into ??? fields
         $stmt->bindParam(":steps", $this->steps);
         $stmt->bindParam(":timeESP", $this->timeESP);
-        $stmt->bindParam(":deviceID", $this->deviceID);
+        $stmt->bindParam(":device_id", $this->device_id);
         
         //execute
         if($stmt->execute()) {

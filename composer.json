@@ -1,0 +1,9 @@
+{
+    "require": {
+        "kreait/firebase-php": "^6.3",
+        "klein/klein": "^2.1"
+    },
+    "autoload": {
+        "classmap": ["class", "controllers", "db_config"]
+    }
+}

@@ -8,8 +8,9 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 
 include_once '../../db_config/config.php';
 include_once '../../class/Bpm.php';
+include_once '../../class/User.php';
 include_once '../../db_config/util.php';
-
+include_once "../../db_config/firebase_util.php";
 
 //connect to DB
 $database = new PDOdb();
@@ -30,6 +31,11 @@ if(empty($data)) {
 $bpm = $_REQUEST["bpm"];
 $timeESP = $_REQUEST["timeESP"];
 
+if(isset($_REQUEST["device_id"])) {
+    $bpm_inst->device_id = intval($_REQUEST["device_id"]);
+} else {
+    $bpm_inst->device_id = 0;
+}
 
 if(isset($bpm) & isset($timeESP)) {
     $bpm_inst->bpm = $bpm;
@@ -42,7 +48,25 @@ if(isset($bpm) & isset($timeESP)) {
         http_response_code(201);
         echo json_encode(array("message" => "insert successful"));
     }
-} 
+}
+
+//check for high bpm, notify if necessary
+if(isset($_REQUEST["device_id"])) {
+    $device_id = $_REQUEST["device_id"];
+    $user_inst = new User($db);
+    $user_id = $user_inst->getUserIDfromDeviceID($device_id);
+    $stmt = $user_inst->getSettings($user_id);
+    $settings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+    $max_hr = $settings["max_hr"];
+    if($bpm > $max_hr) {
+        $notification = array(
+            "title"=> "Watch out, maximum heart rate reached!"
+        );
+        sendFirebaseNotification($user_inst->getFirebaseToken($user_id), $notification);
+    }
+}
+
+
 exit();
 
 

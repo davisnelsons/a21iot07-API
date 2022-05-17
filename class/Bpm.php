@@ -1,11 +1,12 @@
 <?php
-//require "../../db_config/config.php";
+
 class Bpm{
     
     private $bpmTable = "a21iot07.bpm";
     public $bpm;
     public $timeESP;
     public $timePHP;
+    public $device_id;
     private $conn;
 
     public function __construct($db) {
@@ -13,7 +14,7 @@ class Bpm{
     }
 
     public function read() {
-        $query = "SELECT * FROM a21iot07.bpm
+        $query = "SELECT bpm, timeESP, timePHP FROM a21iot07.bpm
         WHERE timeESP >= :timeToday AND timeESP <= :timeTodayMidnight" ;
         $timeToday = date("Y-m-d ") . "00:00:00";
         $timeTodayMidnight = date("Y-m-d ") . "23:59:59";
@@ -22,7 +23,24 @@ class Bpm{
         $stmt->bindParam(":timeToday", $timeToday);
         $stmt->bindParam(":timeTodayMidnight", $timeTodayMidnight);
         $stmt->execute();
-        return $stmt;
+        $itemCount = $stmt->rowCount();
+        if($itemCount > 0){    
+            $bpmArray = array();
+            $bpmArray["body"] = array();
+            $bpmArray["itemCount"] = $itemCount;
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                extract($row);
+                $b = array(
+                    "bpm" => intval($bpm),
+                    "timeESP"=>$timeESP,
+                    "timePHP"=>$timePHP
+                );
+                array_push($bpmArray["body"], $b);
+            }
+        } else {
+            $bpmArray = null;
+        }
+        return $bpmArray;
     }
 
     public function readAfter($timeESP) {
@@ -56,7 +74,9 @@ class Bpm{
         $stmt->bindParam(":timeBefore", $timeBefore);
         $stmt->bindParam(":timeAfter", $timeAfter);
         $stmt->execute();
-        return $stmt;
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        extract($row);
+        return array("avg_bpm"=>intval($avg_bpm));
     }
 
     public function readLast() {
@@ -68,7 +88,8 @@ class Bpm{
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":timeToday", $timeToday);
         $stmt->execute();
-        return $stmt;
+        $ret = $stmt->fetch(PDO::FETCH_OBJ);
+        return $ret;
     }
     
     public function readWeekAvg() {
@@ -77,19 +98,22 @@ class Bpm{
         HAVING dateESP > DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) AND dateESP <= CURRENT_DATE();";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        return $stmt;
+        $ret = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return array(
+            "body"=>$ret
+        );
     }
 
     public function create() {
 
         //prepare query
-        $query = "INSERT INTO ". $this->bpmTable." (`bpm`, `timeESP`, `timePHP`)  VALUES (:bpm, :timeESP, :timePHP)";
+        $query = "INSERT INTO ". $this->bpmTable." (`bpm`, `timeESP`, `timePHP`, `device_id`)  VALUES (:bpm, :timeESP, :timePHP, :device_id)";
         $stmt = $this->conn->prepare($query);
         //insert values into ??? fields
         $stmt->bindParam(":bpm", $this->bpm);
         $stmt->bindParam(":timeESP", $this->timeESP);
         $stmt->bindParam(":timePHP", $this->timePHP);
-        
+        $stmt->bindParam(":device_id", $this->device_id);
         //execute
         if($stmt->execute()) {
             return true;

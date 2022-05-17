@@ -21,29 +21,21 @@ if (!$is_jwt_valid) {
     //token invalid, exit script
     token_invalid();
 }
-
 //get user id from the token
 $userID = get_user_id($token);
+//get posted data
+$data = json_decode(file_get_contents("php://input"));
+if(isset($data->firebaseToken)) {
+    $token = $data->firebaseToken;
+    if($user_inst->setFirebaseToken($userID, $token)) {
+        http_response_code(200);
+        echo json_encode(array("message"=>"insert successful"));
+    } else {
+        http_response_code(200);
+        echo json_encode(array("error"=>"failed to update token"));
+    }
 
-//get statement
-$stmt = $user_inst->getSettings($userID);
-
-//initialize array that will be returned
-$settings_array = array(
-    "daily_steps"=>null,
-    "daily_calories"=>null,
-    "max_hr"=>null,
-    "notify_hr"=>null,
-    "notify_sitting"=>null
-);
-
-
-while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-    extract($row);
-    //change only array elems that have a set val
-    $settings_array[$setting] = intval($value);
+} else {
+    http_response_code(200);
+    echo json_encode(array("error"=>"failed to update token"));
 }
-
-http_response_code(200);
-echo json_encode($settings_array);
-

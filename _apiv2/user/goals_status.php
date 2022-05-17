@@ -22,9 +22,7 @@ $is_jwt_valid = is_jwt_valid($token);
 
 if (!$is_jwt_valid) {
     if(isset($_REQUEST["device_id"])) {
-        $stmt = $user_inst->getUserIDfromDeviceID($_REQUEST["device_id"]);
-        $res = $stmt->fetchAll(PDO::FETCH_OBJ);
-        $userID = ($res[0])->user_id;
+        $userID = $user_inst->getUserIDfromDeviceID($_REQUEST["device_id"]);;
     } else {
         //token invalid, exit script
         token_invalid();
