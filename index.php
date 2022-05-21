@@ -30,9 +30,6 @@ $klein->respond(function ($request, $response, $service, $app) use ($klein) {
     
 });
 
-$klein->respond('GET', '/hello-world[*]', function ($request, $response) {
-    return "Hello " . $request->name;
-});
 
 //Login endpoint
 $klein->respond("POST", "/apiv2/user/login[*]", function ($request, $response, $service, $app) {
