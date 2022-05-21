@@ -2,18 +2,18 @@
 /*
 Adapted from https://roytuts.com/php-rest-api-authentication-using-jwt/
 */
+Class jwt_util {
 
-
-function generate_jwt($headers, $payload) {
+public function generate_jwt($headers, $payload) {
 	$secret = 'iot0770tioIOT0770TIOIIIOOOTtT000777OOOTTTIII777';
 
 
-	$headers_encoded = base64url_encode(json_encode($headers));
+	$headers_encoded = $this->base64url_encode(json_encode($headers));
 	
-	$payload_encoded = base64url_encode(json_encode($payload));
+	$payload_encoded = $this->base64url_encode(json_encode($payload));
 	
 	$signature = hash_hmac('SHA256', "$headers_encoded.$payload_encoded", $secret, true);
-	$signature_encoded = base64url_encode($signature);
+	$signature_encoded = $this->base64url_encode($signature);
 	
 	$jwt = "$headers_encoded.$payload_encoded.$signature_encoded";
 	
@@ -21,7 +21,7 @@ function generate_jwt($headers, $payload) {
 }
 
 
-function get_authorization_header(){
+private function get_authorization_header(){
 	$headers = null;
 	
 	if (isset($_SERVER['Authorization'])) {
@@ -41,7 +41,7 @@ function get_authorization_header(){
 	return $headers;
 }
 
-function is_jwt_valid($jwt) {
+public function is_jwt_valid($jwt) {
 	if(is_null($jwt)) {
 		return FALSE;
 	}
@@ -52,7 +52,7 @@ function is_jwt_valid($jwt) {
 	$header = base64_decode($tokenParts[0]);
 	$payload = base64_decode($tokenParts[1]);
 	$signature_provided = $tokenParts[2];
-
+	
 	//echo "received header is " . $header . " and received payload is " . $payload;
 
 	// check the expiration time - note this will cause an error if there is no 'exp' claim in the jwt
@@ -60,10 +60,10 @@ function is_jwt_valid($jwt) {
 	$is_token_expired = ($expiration - time()) < 0;
 
 	// build a signature based on the header and payload using the secret
-	$base64_url_header = base64url_encode($header);
-	$base64_url_payload = base64url_encode($payload);
+	$base64_url_header = $this->base64url_encode($header);
+	$base64_url_payload = $this->base64url_encode($payload);
 	$signature = hash_hmac('SHA256', $base64_url_header . "." . $base64_url_payload, $secret, true);
-	$base64_url_signature = base64url_encode($signature);
+	$base64_url_signature = $this->base64url_encode($signature);
 
 	// verify it matches the signature provided in the jwt
 	$is_signature_valid = ($base64_url_signature === $signature_provided);
@@ -73,11 +73,11 @@ function is_jwt_valid($jwt) {
 		return FALSE;
 	} else {
 		return TRUE;
-	}
+	} 
 }
 
-function get_bearer_token() {
-    $headers = get_authorization_header();
+public function get_bearer_token() {
+    $headers = $this->get_authorization_header();
 	
     // HEADER: Get the access token from the header
     if (!empty($headers)) {
@@ -88,21 +88,23 @@ function get_bearer_token() {
     return null;
 }
 
-function get_user_id($token) {
+public function get_user_id($token) {
     $tokenParts = explode('.', $token);
     $payload = json_decode(base64_decode($tokenParts[1]));
     return $payload->userId;
 }
-function token_invalid() {
+private function token_invalid() {
     http_response_code(401);
     echo json_encode(array("error"=>"invalid token"));
     exit();
 }
 
-function base64url_encode($data) {
+private function base64url_encode($data) {
     return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
-  }
+}
   
-  function base64url_decode($data) {
+private function base64url_decode($data) {
     return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
-  }
+}
+
+}

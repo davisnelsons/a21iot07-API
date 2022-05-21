@@ -4,6 +4,7 @@ class User{
     public $userFirstName;
     public $userLastName;
     public $userEmail;
+    public $userID;
 
     public function __construct($db) {
         $this->conn = $db;
@@ -49,7 +50,8 @@ class User{
             extract($row);                                                    //makes a variable %$userId containing userId
             $headers = array("alg"=>"HS256", "typ"=>"JWT");
             $payload = array("userId"=>$userId, "exp"=>(time()+$expires_in));        //token expires in 1 hour, token also contains userId
-            $jwt = generate_jwt($headers, $payload);
+            $jwt_util = new jwt_util();
+            $jwt = $jwt_util->generate_jwt($headers, $payload);
             return $jwt;
         } else {
             //failed to authorize
@@ -62,15 +64,24 @@ class User{
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam("user_id", $user_id);
         $stmt->execute();
-        return $stmt;
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        extract($row);
+        $user_data = array(
+            "name" => $name,
+            "lastName" => $lastName,
+            "birthDate" => $birthDate,
+            "weight" => $weight,
+            "height" => $height,
+            "email" => $email,
+            "best_step_week" => $best_steps
+        );
+        return $user_data;
     }
 
-    public function getUserIDfromDeviceID($device_id) {
-        $query = "SELECT user_id FROM a21iot07.device WHERE device_id = :device_id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":device_id", $device_id);
-        $stmt->execute();
-        return $stmt;
+    
+
+    public function setUserID($userID) {
+        $this->userID = $userID;
     }
 
     public function linkDevice($device_id, $user_id) {
@@ -90,7 +101,19 @@ class User{
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":user_id", $user_id);
         $stmt->execute();
-        return $stmt;
+        $settings_array = array(
+            "daily_steps"=>null,
+            "daily_calories"=>null,
+            "max_hr"=>null,
+            "notify_hr"=>null,
+            "notify_sitting"=>null
+        );
+        
+        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            extract($row);
+            $settings_array[$setting] = intval($value);
+        }
+        return $settings_array;
     }
 
     public function postSettings($setting, $value, $user_id) {
@@ -119,5 +142,28 @@ class User{
         return false;
     
     }
+
+    public function getFirebaseToken($user_id) {
+        $query =  "SELECT firebaseToken FROM a21iot07.user
+                    WHERE userId = :userID;";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":userID", $user_id);
+        $stmt->execute();
+        $ret = $stmt->fetch(PDO::FETCH_OBJ);
+        $token = $ret->firebaseToken;
+        return $token;
+    }
     
+    public function setFirebaseToken($user_id, $token) {
+        $query =  "UPDATE a21iot07.user SET
+        firebaseToken = :token
+        WHERE userId = :userID;";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":userID", $user_id);
+        $stmt->bindParam(":token", $token);
+        if($stmt->execute()) {
+            return true;
+        }
+        return false;
+    }
 }
