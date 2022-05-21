@@ -143,11 +143,11 @@ class User{
     
     }
 
-    public function getFirebaseToken($user_id) {
+    public function getFirebaseToken() {
         $query =  "SELECT firebaseToken FROM a21iot07.user
                     WHERE userId = :userID;";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":userID", $user_id);
+        $stmt->bindParam(":userID", $this->userID);
         $stmt->execute();
         $ret = $stmt->fetch(PDO::FETCH_OBJ);
         $token = $ret->firebaseToken;

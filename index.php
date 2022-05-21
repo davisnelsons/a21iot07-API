@@ -5,7 +5,6 @@ include_once __DIR__ . '/db_config/config.php';
 
 
 $klein = new \Klein\Klein();
-
 //masterclass
 $klein->respond(function ($request, $response, $service, $app) use ($klein) {
     // Handle exceptions => flash the message and redirect to the referrer
@@ -16,11 +15,19 @@ $klein->respond(function ($request, $response, $service, $app) use ($klein) {
     //connect to DB
     $database = new PDOdb();
     $app->db = $database->getConnection();
+    //instantiate models
+    $models = (object) array(
+        "userModel" => new User($app->db),
+        "bpmModel" => new Bpm($app->db),
+        "stepsModel" => new Steps($app->db),
+        "deviceModel" => new Device($app->db)
+    );
     //instantiate controllers   
-    $app->bpmController = new BpmController($app->db);
-    $app->userController = new UserController($app->db);
-    $app->stepsController = new StepsController($app->db);
-    $app->deviceController = new DeviceController($app->db);
+    $app->bpmController = new BpmController($models);
+    $app->userController = new UserController($models);
+    $app->stepsController = new StepsController($models);
+    $app->deviceController = new DeviceController($models);
+    
 });
 
 $klein->respond('GET', '/hello-world[*]', function ($request, $response) {
@@ -40,13 +47,25 @@ $klein->respond("/apiv2/user/[:action].[*]?", function ($request, $response, $se
     if($request->action == "get_user") {
         if($app->userController->authorizeUser($request)) {
             $userData = $app->userController->getUserData($request);
-            return $userData;
+            return json_encode($userData);
         }
     } else if ($request->action == "post_settings") {
         if($app->userController->authorizeUser($request)) {
             return ($app->userController->setUserData($request)) ?
                 json_encode(array("message"=>"insert successful")) : 
                 json_encode(array("error"=>"failed to insert"));
+        }
+    } else if ($request->action == "update_firebase") {
+        if($app->userController->authorizeUser($request)) {
+            return ($app->userController->setFirebaseToken($request))  ?
+            json_encode(array("message"=>"insert successful")) : 
+            json_encode(array("error"=>"failed to insert"));
+        }
+    } else if ($request->action == "link_device") {
+        if($app->userController->authorizeUser($request)) {
+            return $app->deviceController->linkDevice($request) ? 
+            json_encode(array("message"=>"insert successful")) : 
+            json_encode(array("error"=>"failed to insert"));
         }
     }
 });
@@ -56,12 +75,10 @@ BPM endpoint
 */
 $klein->respond("/apiv2/bpm/[:action].[*]?/[:specifier]?", function ($request, $response, $service, $app) {
     //read bpm data
-    //print_r($request->params());
     if($request->action == "read") {
         if($app->userController->authorizeUser($request)) {
             return $app->bpmController->read($request);
         } else {
-            
             return json_encode(array(
                 "error"=>"invalid token"
             ));
@@ -90,6 +107,14 @@ $klein->respond("/apiv2/steps/[:action].[*]?", function($request, $response, $se
         }
     } else if($request->action == "create") {
         if($app->stepsController->create($request)) {
+            $deviceID = $request->params()["device_id"];
+            $stepsMade = $request->params()["steps"];
+            $app->userController->setUserIDfromDeviceID($deviceID);
+            $totalStepsToday = $app->stepsController->readAllToday();
+            $stepGoal = ($app->userController->getUserData(null))["daily_steps"];
+            if ($totalStepsToday >= $stepGoal & $totalStepsToday - $stepsMade <= $stepGoal ) {
+                $app->userController->sendNotification("Congratulations, you have reached your daily step goal!");
+            }
             return json_encode(array(
                 "message"=>"insert successful"
             ));
@@ -114,6 +139,10 @@ $klein->respond("/apiv2/random.php", function () {
     return json_encode(array(
         "test"=>rand(0,1)
     ));
+});
+
+$klein->respond("/apiv2/test_notification.php", function () {
+    $app->userController->sendNotification("Congratulations, you have reached your daily step goal!");
 });
 
 $klein->dispatch();
