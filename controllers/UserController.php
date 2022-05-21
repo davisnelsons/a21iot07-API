@@ -1,10 +1,10 @@
 <?php 
 class UserController {
-    private $conn;
 
-    public function __construct($db) {
-        $this->conn = $db;
-        $this->userModel = new User($db);
+
+    public function __construct($models) {
+        $this->userModel = $models->userModel;
+        $this->deviceModel = $models->deviceModel;
     }
 
     public function login($request) {
@@ -31,7 +31,7 @@ class UserController {
         $jwt_util = new jwt_util();
         $userData = $this->userModel->getUser($this->userModel->userID);
         $userSettings =  $this->userModel->getSettings($this->userModel->userID);
-        return json_encode(array_merge($userData, $userSettings));
+        return array_merge($userData, $userSettings);
     }
 
     public function setUserData($request) {
@@ -45,5 +45,25 @@ class UserController {
             );
         }
         return $status;
+        
+    }
+
+    public function setFirebaseToken($request) {
+        $token = json_decode($request->body())->firebaseToken;
+        return $this->userModel->setFirebaseToken($this->userModel->userID, $token);
+    }
+
+    public function setUserIDfromDeviceID($deviceID) {
+        $this->deviceModel->setDeviceID($deviceID);
+        $this->userModel->userID = $this->deviceModel->getAssociatedUserID();
+    }
+
+
+    public function sendNotification($message) {
+        $notification = array(
+            "title" => $message
+        );
+        $firebaseToken = $this->userModel->getFirebaseToken();
+        firebase_util::sendFirebaseNotification($firebaseToken, $notification);
     }
 }

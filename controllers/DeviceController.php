@@ -1,13 +1,12 @@
 <?php 
 class DeviceController {
-    private $conn;
 
-    public function __construct($db) {
-        $this->conn = $db;
-        $this->userModel = new User($db);
-        $this->deviceModel = new Device($db);
-        $this->bpmModel = new Bpm($db);
-        $this->stepsModel = new Steps($db);
+
+    public function __construct($models) {
+        $this->userModel = $models->userModel;
+        $this->deviceModel = $models->deviceModel;
+        $this->bpmModel = $models->bpmModel;
+        $this->stepsModel = $models->stepsModel;
     }
 
     public function getDeviceNotifications($request) {
@@ -25,8 +24,12 @@ class DeviceController {
             "max_hr" => ($lastBPMMeasurement >= $maxBPM) ? 1 : 0,
             "daily_steps" => ($totalStepsMeasurement >= $stepsGoal) ? 1 : 0
         ));
-
-
     }
+
+    public function linkDevice($request) {
+        $this->deviceModel->deviceID = json_decode($request->body())->deviceID;
+        return ($this->deviceModel->linkDevice($this->userModel->userID));
+    }
+    
 }
 

@@ -1,11 +1,10 @@
 <?php
 
 class StepsController{
-    private $conn;
 
-    public function __construct($db) {
-        $this->conn = $db;
-        $this->stepsModel = new Steps($db);
+
+    public function __construct($models) {
+        $this->stepsModel = $models->stepsModel;
     }
 
     public function read($request) {
@@ -30,6 +29,11 @@ class StepsController{
         $this->stepsModel->device_id = (array_key_exists("device_id", $params)) ? $params["device_id"] : 0;
 
         return $this->stepsModel->create();
+    }
+
+    public function readAllToday() {
+        $totalSteps = $this->stepsModel->getSumToday();
+        return $totalSteps;
     }
 
 }
