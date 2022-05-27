@@ -60,7 +60,6 @@ class BpmController{
 
     public function create($request) {
         $params = $request->params();
-        
         $this->bpmModel->bpm = $params["bpm"];
         $this->bpmModel->timeESP = $params["timeESP"];
         $this->bpmModel->device_id = (array_key_exists("device_id", $params)) ? $params["device_id"] : 0;

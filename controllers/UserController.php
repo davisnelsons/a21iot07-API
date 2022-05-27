@@ -34,7 +34,7 @@ class UserController {
         return array_merge($userData, $userSettings);
     }
 
-    public function setUserData($request) {
+    public function setSettings($request) {
         $body = json_decode($request->body());
         $settingsArray = $body->settings;
         foreach($settingsArray as $setting) {
