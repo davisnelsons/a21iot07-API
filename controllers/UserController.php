@@ -27,11 +27,20 @@ class UserController {
         return $tokenValid;
     }
 
-    public function getUserData($request) {
+    public function getUserData($request) { //and settings
         $jwt_util = new jwt_util();
         $userData = $this->userModel->getUser($this->userModel->userID);
         $userSettings =  $this->userModel->getSettings($this->userModel->userID);
         return array_merge($userData, $userSettings);
+    }
+
+    public function setUserData($request) {
+        $userdataArray = json_decode($request->body())->userdata;
+
+        foreach($userdataArray as $userdata) {
+            $status = $this->userModel->setUserData($userdata->data, $userdata->value);
+        }
+        return $status;
     }
 
     public function setSettings($request) {

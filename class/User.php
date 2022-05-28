@@ -78,6 +78,13 @@ class User{
         return $user_data;
     }
 
+    public function setUserData($field, $value) {
+        $query = "UPDATE " . $this->userTable . " SET " . $field . " = '" .  $value . "' WHERE userId = :user_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":user_id", $this->userID);
+        if($stmt->execute()) return true;
+        return false;
+    }
     
 
     public function setUserID($userID) {
@@ -106,7 +113,7 @@ class User{
             "daily_calories"=>null,
             "max_hr"=>null,
             "notify_hr"=>null,
-            "notify_sitting"=>null
+            "notify_steps"=>null
         );
         
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {

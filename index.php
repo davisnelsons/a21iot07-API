@@ -40,6 +40,13 @@ $klein->respond(function ($request, $response, $service, $app) {
     {
         
             if($app->bpmController->create($request)) {
+                $deviceID = $request->params()["device_id"];
+                $bpm = $request->params()["bpm"];
+                $app->userController->setUserIDfromDeviceID($deviceID);
+                $maxHR = ($app->userController->getUserData(null))["max_hr"];
+                if($bpm > $maxHR) {
+                    $app->userController->sendNotification("Watch out, heart rate threshold reached!");
+                }
                 return json_encode(array(
                     "message"=>"insert successful"
                 ));
@@ -80,6 +87,7 @@ User endpoint
 */
 
 $klein->respond("/apiv2/user/[:action].[*]?", function ($request, $response, $service, $app) {
+    
     if($request->action == "get_user") {
         if($app->userController->authorizeUser($request)) {
             $userData = $app->userController->getUserData($request);
@@ -91,8 +99,12 @@ $klein->respond("/apiv2/user/[:action].[*]?", function ($request, $response, $se
                 json_encode(array("message"=>"insert successful")) : 
                 json_encode(array("error"=>"failed to insert"));
         }
-    } else if ($request->action = "post_user_data") {
-        ;;
+    } else if ($request->action == "post_user_data") {
+        if($app->userController->authorizeUser($request)) {
+            return ($app->userController->setUserData($request)) ?
+                json_encode(array("message"=>"insert successful")) : 
+                json_encode(array("error"=>"failed to insert"));
+        }
     } else if ($request->action == "update_firebase") {
         if($app->userController->authorizeUser($request)) {
             return ($app->userController->setFirebaseToken($request))  ?
