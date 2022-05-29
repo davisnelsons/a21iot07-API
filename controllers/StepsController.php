@@ -29,7 +29,7 @@ class StepsController{
 
         $this->stepsModel->steps = $params["steps"];
         $this->stepsModel->timeESP = $params["timeESP"];
-        $this->stepsModel->device_id = (array_key_exists("device_id", $params)) ? $params["device_id"] : 0;
+        $this->stepsModel->deviceID = (array_key_exists("device_id", $params)) ? $params["device_id"] : 0;
 
         return $this->stepsModel->create();
     }

@@ -174,6 +174,7 @@ $klein->respond("/apiv2/steps/[:action].[*]?", function($request, $response, $se
 Device Endpoint(s)
 */
 $klein->respond("http://34.76.181.57/apiv2/device/get_device_notifications.[*]?", function ($request, $response, $service, $app) {
+    // error_log(json_encode($request->params()), 0);
     $app->responseController->respond(
         $app->deviceController->getDeviceNotifications($request)
     );
