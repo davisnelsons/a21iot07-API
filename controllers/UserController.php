@@ -17,6 +17,21 @@ class UserController {
         );
     }
 
+    public function signup($request) {
+        $body = json_decode($request->body());
+        $successful = $this->userModel->signup(
+            $body->firstName,
+            $body->lastName,
+            $body->email,
+            $body->password,
+            $body->birthDate,
+            $body->weight,
+            $body->height
+        );
+        $this->userModel->userEmail = $body->email;
+        return $successful;
+    }
+
     public function authorizeUser($request) {
         $jwt_util = new jwt_util();  
         $token = explode(" ", $request->headers()->Authorization)[1];
@@ -57,6 +72,35 @@ class UserController {
         
     }
 
+    public function setDefaultSettings() {
+        print_r($this->userModel);
+        $this->userModel->postSettings(
+            "daily_steps",
+            10000,
+            $this->userModel->userID
+        );
+        $this->userModel->postSettings(
+            "max_hr",
+            170,
+            $this->userModel->userID
+        );
+        $this->userModel->postSettings(
+            "daily_calories",
+            1000,
+            $this->userModel->userID
+        );
+        $this->userModel->postSettings(
+            "notify_hr",
+            1,
+            $this->userModel->userID
+        );
+        $this->userModel->postSettings(
+            "notify_steps",
+            1,
+            $this->userModel->userID
+        );
+    }
+
     public function setFirebaseToken($request) {
         $token = json_decode($request->body())->firebaseToken;
         return $this->userModel->setFirebaseToken($this->userModel->userID, $token);
@@ -66,8 +110,16 @@ class UserController {
         $this->deviceModel->setDeviceID($deviceID);
         $this->userModel->userID = $this->deviceModel->getAssociatedUserID();
     }
+    public function setUserIDfromEmail() {
+        $this->userModel->getIDfromEmail();
+    }
 
+    public function userHasDevice() {
+        if($this->deviceModel->getAssociatedDeviceID($this->userModel->userID) != null) return true;
+        return false;
+    }
 
+    
     public function sendNotification($message) {
         $notification = array(
             "title" => $message

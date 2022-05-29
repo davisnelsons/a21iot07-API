@@ -87,7 +87,6 @@ class Bpm{
         $query = "SELECT * FROM a21iot07.bpm
         WHERE (timeESP < DATE_ADD(NOW(), INTERVAL 2 HOUR)) AND device_id = :deviceID
         ORDER BY timeESP desc LIMIT 1";
-        //$stmt = $this->conn->query($query);
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":deviceID", $this->deviceID);
         $stmt->execute();

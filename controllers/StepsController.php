@@ -5,19 +5,22 @@ class StepsController{
 
     public function __construct($models) {
         $this->stepsModel = $models->stepsModel;
+        $this->deviceModel = $models->deviceModel;
+        $this->userModel = $models->userModel;
     }
 
     public function read($request) {
         $params = $request->params();
-
+        $this->stepsModel->deviceID = $this->deviceModel->getAssociatedDeviceID($this->userModel->userID);
+        
         if(array_key_exists("from", $params) & array_key_exists("to", $params)) {
             $from = $params['from'];
             $to = $params['to'];
             $queryResult = $this->stepsModel->read($from, $to);
-            return json_encode($queryResult);
+            return $queryResult;
         } else {
             $queryResult = $this->stepsModel->read();
-            return json_encode($queryResult);
+            return $queryResult;
         }
     }
 

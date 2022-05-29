@@ -11,6 +11,8 @@ class DeviceController {
 
     public function getDeviceNotifications($request) {
         $this->deviceModel->deviceID = ($request->params())["device_id"];
+        $this->bpmModel->deviceID = ($request->params())["device_id"];
+        $this->stepsModel->deviceID = ($request->params())["device_id"];
         $userID = $this->deviceModel->getAssociatedUserID();
         $settings = $this->userModel->getSettings($userID);
 

@@ -13,7 +13,7 @@ class User{
     public function signup($newFirstName, $newLastName, $newEmail, $newPassword, $newBirthDate, $newWeight, $newHeight) {
         $query = "INSERT INTO ".$this->userTable." (`name`, `lastName`, `email`, `password`, `birthDate`, `weight`, `height`)
          VALUES (:firstName, :lastName, :email, :password, :birthDate, :weight, :height)";
-        $query2 = "SELECT userId FROM ".$this->userTable." WHERE email like :email;";
+        
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":firstName", $newFirstName);
         $stmt->bindParam(":lastName", $newLastName);
@@ -23,7 +23,7 @@ class User{
         $stmt->bindParam(":weight", $newWeight);
         $stmt->bindParam(":height", $newHeight);
         //execute
-        if($stmt->execute()) {
+        /*if($stmt->execute()) {
             $stmt2 = $this->conn->prepare($query2);
             $stmt2->bindParam(":email", $newEmail);
             $stmt2->execute();
@@ -31,11 +31,22 @@ class User{
             extract($row);
             $this->postDefaultSettings($userId);
             return true;
-        }
+        }*/
         //if there is an error
-        $error = $this->conn->getMessage();
-        echo $error;
+        //$error = $this->conn->getMessage();
+        //echo $error;
+        if($stmt->execute()) return true;
         return false;   
+    }
+
+    public function getIDfromEmail() {
+        $query = "SELECT userId FROM ".$this->userTable." WHERE email like :email;";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":email", $this->userEmail);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        extract($row);
+        $this->userID = $userId;
     }
 
     public function login($email, $password, $expires_in) {
@@ -72,8 +83,8 @@ class User{
             "birthDate" => $birthDate,
             "weight" => $weight,
             "height" => $height,
-            "email" => $email,
-            "best_step_week" => $best_steps
+            "email" => $email
+            //"best_step_week" => $best_steps
         );
         return $user_data;
     }
@@ -92,7 +103,8 @@ class User{
     }
 
     public function linkDevice($device_id, $user_id) {
-        $query = "INSERT INTO a21iot07.Device (device_id, user_id) VALUES (:device_id, :user_id);";
+        $query = "DELETE FROM a21iot07.device WHERE user_id = :user_id;
+        INSERT INTO a21iot07.Device (device_id, user_id) VALUES (:device_id, :user_id);";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":device_id", $device_id);
         $stmt->bindParam(":user_id", $user_id);
