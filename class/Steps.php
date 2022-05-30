@@ -5,7 +5,7 @@ class Steps{
     public $steps;
     public $timeESP;
     public $timePHP;
-    public $device_id;
+    public $deviceID;
     private $conn;
 
     public function __construct($db) {
@@ -29,12 +29,13 @@ class Steps{
 
     private function getData($from, $to) {
         $query = "SELECT DATE_FORMAT(timeESP, '%Y-%m-%d %H:00:00') as `time`, SUM(steps) as `steps` FROM steps
-        WHERE timeESP >= :from AND timeESP <= :to
+        WHERE timeESP >= :from AND timeESP <= :to AND deviceID = :deviceID
         GROUP BY `time`
         ORDER BY `time`;";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":from", $from);
         $stmt->bindParam(":to", $to);
+        $stmt->bindParam(":deviceID", $this->deviceID);
         $stmt->execute();
         $itemCount = $stmt->rowCount();
         if($itemCount > 0){    
@@ -70,12 +71,13 @@ class Steps{
 
     public function getSumToday() {
         $query = "SELECT SUM(steps) as sum_steps FROM a21iot07.steps
-        WHERE timeESP > :date1 AND timeESP < :date2";
+        WHERE timeESP > :date1 AND timeESP < :date2 AND deviceID = :deviceID";
         $stmt = $this->conn->prepare($query);
         $dateToday1 = date("Y-m-d ") . "00:00:00";
         $dateToday2 = date("Y-m-d ") . "23:59:59";
         $stmt->bindParam(":date1", $dateToday1);
         $stmt->bindParam(":date2", $dateToday2);
+        $stmt->bindParam(":deviceID", $this->deviceID);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         extract($row);
@@ -89,7 +91,7 @@ class Steps{
         //insert values into ??? fields
         $stmt->bindParam(":steps", $this->steps);
         $stmt->bindParam(":timeESP", $this->timeESP);
-        $stmt->bindParam(":device_id", $this->device_id);
+        $stmt->bindParam(":device_id", $this->deviceID);
         
         //execute
         if($stmt->execute()) {

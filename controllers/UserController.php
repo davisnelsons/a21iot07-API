@@ -17,6 +17,21 @@ class UserController {
         );
     }
 
+    public function signup($request) {
+        $body = json_decode($request->body());
+        $successful = $this->userModel->signup(
+            $body->firstName,
+            $body->lastName,
+            $body->email,
+            $body->password,
+            $body->birthDate,
+            $body->weight,
+            $body->height
+        );
+        $this->userModel->userEmail = $body->email;
+        return $successful;
+    }
+
     public function authorizeUser($request) {
         $jwt_util = new jwt_util();  
         $token = explode(" ", $request->headers()->Authorization)[1];
@@ -27,7 +42,7 @@ class UserController {
         return $tokenValid;
     }
 
-    public function getUserData($request) {
+    public function getUserData($request) { //and settings
         $jwt_util = new jwt_util();
         $userData = $this->userModel->getUser($this->userModel->userID);
         $userSettings =  $this->userModel->getSettings($this->userModel->userID);
@@ -35,6 +50,15 @@ class UserController {
     }
 
     public function setUserData($request) {
+        $userdataArray = json_decode($request->body())->userdata;
+
+        foreach($userdataArray as $userdata) {
+            $status = $this->userModel->setUserData($userdata->data, $userdata->value);
+        }
+        return $status;
+    }
+
+    public function setSettings($request) {
         $body = json_decode($request->body());
         $settingsArray = $body->settings;
         foreach($settingsArray as $setting) {
@@ -48,6 +72,34 @@ class UserController {
         
     }
 
+    public function setDefaultSettings() {
+        $this->userModel->postSettings(
+            "daily_steps",
+            10000,
+            $this->userModel->userID
+        );
+        $this->userModel->postSettings(
+            "max_hr",
+            170,
+            $this->userModel->userID
+        );
+        $this->userModel->postSettings(
+            "daily_calories",
+            1000,
+            $this->userModel->userID
+        );
+        $this->userModel->postSettings(
+            "notify_hr",
+            1,
+            $this->userModel->userID
+        );
+        $this->userModel->postSettings(
+            "notify_steps",
+            1,
+            $this->userModel->userID
+        );
+    }
+
     public function setFirebaseToken($request) {
         $token = json_decode($request->body())->firebaseToken;
         return $this->userModel->setFirebaseToken($this->userModel->userID, $token);
@@ -57,8 +109,16 @@ class UserController {
         $this->deviceModel->setDeviceID($deviceID);
         $this->userModel->userID = $this->deviceModel->getAssociatedUserID();
     }
+    public function setUserIDfromEmail() {
+        $this->userModel->getIDfromEmail();
+    }
 
+    public function userHasDevice() {
+        if($this->deviceModel->getAssociatedDeviceID($this->userModel->userID) != null) return true;
+        return false;
+    }
 
+    
     public function sendNotification($message) {
         $notification = array(
             "title" => $message

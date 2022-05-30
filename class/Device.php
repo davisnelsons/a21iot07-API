@@ -29,6 +29,10 @@ class Device{
     }
 
     public function linkDevice($userID) {
+        $del_query = "DELETE FROM a21iot07.device WHERE user_id = :userID;";
+        $stmt = $this->conn->prepare($del_query);
+        $stmt->bindParam(":userID", $userID);
+        $stmt->execute();
         $query = "INSERT INTO a21iot07.device(`device_id`, `user_id`) VALUES (:deviceID, :userID)
         ON DUPLICATE KEY UPDATE
         user_id = :userID";

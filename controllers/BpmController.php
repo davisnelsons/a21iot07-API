@@ -29,38 +29,37 @@ class BpmController{
         $to = array_key_exists("to_ESPtime", $params) ? $params["to_ESPtime"] : null;
         
         if($average) {
-            return json_encode($this->bpmModel->readBetweenAvg($from, $to));
+            return $this->bpmModel->readBetweenAvg($from, $to);
         }
         switch($specifier) {
             case "today": 
                 $queryResult = $this->bpmModel->read();
-                return json_encode($queryResult);
+                return $queryResult;
                 break;
             case "get_last":
                 $queryResult = $this->bpmModel->readLast();
-                return (json_encode(array(
+                return (array(
                     "bpm"=>(intval($queryResult->bpm)),
                     "timeESP"=>($queryResult->timeESP)
-                )));
+                ));
                 break;
             case "week_averages":
                 $queryResult = $this->bpmModel->readWeekAvg();
-                return json_encode($queryResult);
+                return $queryResult;
                 break;
             case "minmax":
                 $min = $this->bpmModel->readWeekMin();
                 $max = $this->bpmModel->readWeekMax();
-                return json_encode(array(
+                return array(
                     "min"=>$min,
                     "max"=>$max   
-                )); 
+                ); 
 
         }
     }
 
     public function create($request) {
         $params = $request->params();
-        
         $this->bpmModel->bpm = $params["bpm"];
         $this->bpmModel->timeESP = $params["timeESP"];
         $this->bpmModel->device_id = (array_key_exists("device_id", $params)) ? $params["device_id"] : 0;

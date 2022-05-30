@@ -11,6 +11,8 @@ class DeviceController {
 
     public function getDeviceNotifications($request) {
         $this->deviceModel->deviceID = ($request->params())["device_id"];
+        $this->bpmModel->deviceID = ($request->params())["device_id"];
+        $this->stepsModel->deviceID = ($request->params())["device_id"];
         $userID = $this->deviceModel->getAssociatedUserID();
         $settings = $this->userModel->getSettings($userID);
 
@@ -19,7 +21,21 @@ class DeviceController {
 
         $lastBPMMeasurement = intval($this->bpmModel->readLast()->bpm);
         $totalStepsMeasurement = $this->stepsModel->getSumToday();
+        // error_log("lastbpm", 0);
+        // error_log($lastBPMMeasurement, 0);
+        // error_log("totalsteps", 0);
+        // error_log($totalStepsMeasurement, 0);
+        // error_log("maxhr", 0);
+        // error_log($maxBPM, 0);
+        // error_log("dailysteps", 0);
+        // error_log($stepsGoal, 0);
 
+        // error_log(json_encode(
+        //     array(
+        //         "max_hr" => ($lastBPMMeasurement >= $maxBPM) ? 1 : 0,
+        //         "daily_steps" => ($totalStepsMeasurement >= $stepsGoal) ? 1 : 0
+        //     )
+        //     ));
         return(array(
             "max_hr" => ($lastBPMMeasurement >= $maxBPM) ? 1 : 0,
             "daily_steps" => ($totalStepsMeasurement >= $stepsGoal) ? 1 : 0
