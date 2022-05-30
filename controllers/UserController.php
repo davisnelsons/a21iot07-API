@@ -73,7 +73,6 @@ class UserController {
     }
 
     public function setDefaultSettings() {
-        print_r($this->userModel);
         $this->userModel->postSettings(
             "daily_steps",
             10000,
