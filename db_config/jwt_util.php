@@ -5,7 +5,7 @@ Adapted from https://roytuts.com/php-rest-api-authentication-using-jwt/
 Class jwt_util {
 
 public function generate_jwt($headers, $payload) {
-	$secret = 'iot0770tioIOT0770TIOIIIOOOTtT000777OOOTTTIII777';
+	$secret = '----';
 
 
 	$headers_encoded = $this->base64url_encode(json_encode($headers));

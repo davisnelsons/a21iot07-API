@@ -34,6 +34,7 @@ $klein->respond(function ($request, $response, $service, $app) use ($klein) {
 
 
 
+//dirty fix to allow traffic from esp32
 $klein->respond(function ($request, $response, $service, $app) {
     
     $params = $request->params();
@@ -174,23 +175,16 @@ $klein->respond("/apiv2/steps/[:action].[*]?", function($request, $response, $se
 Device Endpoint(s)
 */
 $klein->respond("http://34.76.181.57/apiv2/device/get_device_notifications.[*]?", function ($request, $response, $service, $app) {
-    // error_log(json_encode($request->params()), 0);
     $app->responseController->respond(
         $app->deviceController->getDeviceNotifications($request)
     );
 });
-//??
+//one more dirty fix for esp32 traffic to work
 $klein->respond("/apiv2/device/get_device_notifications.[*]?", function ($request, $response, $service, $app) {
     $app->responseController->respond(
         $app->deviceController->getDeviceNotifications($request)
     );
 });
-/*
-$klein->respond("/apiv2/random.php", function () {
-    return json_encode(array(
-        "test"=>rand(0,1)
-    ));
-});*/
 
 $klein->respond("/apiv2/test_notification.php", function () {
     $app->userController->sendNotification("Congratulations, you have reached your daily step goal!");
