@@ -9,7 +9,7 @@ The project was an IoT smart watch that had an app, and this API ensured communi
 * JWT Token authorization
 * Firebase push notifications on specified conditions
 * Login/Sign up a new user
-* Save user data
+* Save and update user data
 * Receive and store BPM data, step data
 * Enable linking of the device with the user
 * Simple user setting key-value store
